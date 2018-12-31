@@ -98,7 +98,9 @@ bool ConnectionHandler::getFrameAscii(std::string& frame, char delimiter) {
 }
  
 bool ConnectionHandler::sendFrameAscii(const std::string& frame, char delimiter) {
-	bool result=sendBytes(frame.c_str(),frame.length());
+    //string is converted to a char array the server can understand.
+    char* toSend = stringToMessage(frame);
+	bool result = sendBytes(toSend,frame.length());
 	if(!result) return false;
 	return sendBytes(&delimiter,1);
 }
@@ -133,7 +135,7 @@ char* ConnectionHandler::registerAndLoginToMessage(std::string input, char *ch_O
     input = input.substr(input.find_first_of(" ") + 1);
     std::string password(input.substr(0,input.find_first_of(" ")));
     //creating output char* in the size of the opcode,username and password
-    char* output[userName.length()+password.length() + 4];
+    char* output[userName.length() + password.length() + 4];
     output[0] = &ch_Opcode[0];
     output[1] = &ch_Opcode[1];
     int index = 2;
@@ -152,7 +154,7 @@ char* ConnectionHandler::registerAndLoginToMessage(std::string input, char *ch_O
 }
 
 char*  ConnectionHandler::postOrStatToMessage(std::string input, char *ch_Opcode){
-    char* output[2+input.length()+1];
+    char* output[2 + input.length() + 1];
     output[0] = &ch_Opcode[0];
     output[1] = &ch_Opcode[1];
     int index = 2;
@@ -168,7 +170,7 @@ char*  ConnectionHandler::postOrStatToMessage(std::string input, char *ch_Opcode
 char* ConnectionHandler::pmToMessage(std::string input, char *ch_Opcode) {
     std::string userName(input.substr(0,input.find_first_of(" ")));
     input = input.substr(input.find_first_of(" ") + 1);
-    char* output[2+userName.length()+input.length()+2];
+    char* output[2 + userName.length() + input.length() + 2];
     output[0] = &ch_Opcode[0];
     output[1] = &ch_Opcode[1];
     int index = 2;
@@ -216,7 +218,7 @@ char* ConnectionHandler::followToMessage(std::string input, char *ch_Opcode) {
     //1.the opcode
     //2.the follow\unfollow
     //3.the names (names) and 0 between them (names.size)
-    char* output[2+1+2+counter+names.size()];
+    char* output[2 + 1 + 2 + counter+names.size()];
     insertElementsToFollowInput(ch_Opcode, yesOrNo, names, *output);
     return *output;
 }
