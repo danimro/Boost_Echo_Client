@@ -9,4 +9,4 @@ add_executable(Boost_Echo_Client
         include/connectionHandler.h
         src/connectionHandler.cpp
         src/echoClient.cpp
-        makefile src/main.cpp)
+        makefile src/main.cpp include/WielerConnectionHandler.h src/WielerConnectionHandler.cpp src/WielerEchoClient.cpp)
