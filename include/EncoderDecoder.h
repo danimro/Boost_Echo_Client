@@ -41,33 +41,6 @@ class EncoderDecoder{
         void init();
 
         /**
-         * Converting Char array to a Short number.
-         * @param bytesArr              Char array to convert.
-         * @return        Short number that is the bytes value of what was in the bytes array.
-         */
-        short bytesToShort(char* bytesArr);
-
-        /**
-         * Converting a short number to array of chars.
-         * @param num               short number to convert.
-         * @param bytesArr          Char array to put the number into.
-         */
-        void shortToBytes(short num, char* bytesArr);
-        /**
-         * Convert the input string from the client to a char array to send to the server.
-         * @param input         String represent the user input.
-         * @return              Char* represent a bytes array to send to the server to process.
-         */
-        char* stringToMessage(std::string input);
-
-       /**
-        * Convert the short number represents the opcode of the message to the message type string.
-        * @param opcode            short number represent the opcode of the message type.
-        * @return      string represents the message type.
-        */
-        std::string messageToString(char* messageFromServer);
-
-        /**
          * default Destructor.
          */
         ~EncoderDecoder() = default;
@@ -87,6 +60,20 @@ class EncoderDecoder{
         //endregion Fields
 
         //region Encoding Functions
+
+        /**
+         * Converting a short number to array of chars.
+         * @param num               short number to convert.
+         * @param bytesArr          Char array to put the number into.
+         */
+        void shortToBytes(short num, char* bytesArr);
+
+        /**
+         * Convert the input string from the client to a char array to send to the server.
+         * @param input         String represent the user input.
+         * @return              Char* represent a bytes array to send to the server to process.
+         */
+        char* stringToMessage(std::string input);
 
         /**
          * Part of the StringToMessage function
@@ -139,6 +126,13 @@ class EncoderDecoder{
         //region Decoding Functions
 
         /**
+        * Convert the short number represents the opcode of the message to the message type string.
+        * @param opcode            short number represent the opcode of the message type.
+        * @return      string represents the message type.
+        */
+        std::string messageToString(char* messageFromServer);
+
+        /**
          * part of the messageToString Function.
          * convert the char array to String notification message to display on the screen to the client.
          * @param messageFromServer             Char Array that was recieved from the server.
@@ -172,12 +166,36 @@ class EncoderDecoder{
 
 
         /**
-         * Part Of the "ackToString" and "errorToString"
-         * converting from the message tha was received from the server what type of message failed or succeeded.
+         * Part of the "ackToString" functions.
+         * translating all the information in the given array from the server as it was an Follow Ack Message.
          * @param messageFromServer             Char array that was received from the server.
-         * @return
+         * @return      String representation of the given array as a follow Ack message.
          */
-        short getOpcodeFromMessageFromServer(char *messageFromServer);
+        std::string followOrUserListAckToString(char *messageFromServer);
+
+        /**
+         * Part of the "ackToString" functions.
+         * translating all the information in the given array from the server as it was an stat Ack Message.
+         * @param messageFromServer             Char array that was received from the server.
+         * @return      String representation of the given array as a stat Ack message.
+         */
+        std::string statAckToString(char *messageFromServer);
+
+
+        /**
+         * Taking the first two chars from the given index from the given char array and convert them to short number.
+         * @param input                 char array to take the number from
+         * @param startIndex            integer index to start taking the number from
+         * @return                      Short number that was taken from the first two bytes from the given array.
+         */
+         short gettingShortFromCharArray(char* input,int startIndex);
+
+         /**
+         * Converting Char array to a Short number.
+         * @param bytesArr              Char array to convert.
+         * @return        Short number that is the bytes value of what was in the bytes array.
+         */
+         short bytesToShort(char* bytesArr);
 
         //endregion Decoding Functions
 };

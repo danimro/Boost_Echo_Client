@@ -13,50 +13,47 @@ using namespace std;
  */
 void EncoderDecoder::init() {
     //Register request = 1
-    this->commandDictionary.insert(std::pair<string,short>("REGISTER",1));
+    this->commandDictionary.insert(std::pair<string,short>("REGISTER",REGISTER));
     //Login request = 2
-    this->commandDictionary.insert(std::pair<string,short>("LOGIN",2));
+    this->commandDictionary.insert(std::pair<string,short>("LOGIN",LOGIN));
     //Logout request = 3
-    this->commandDictionary.insert(std::pair<string,short>("LOGOUT",3));
+    this->commandDictionary.insert(std::pair<string,short>("LOGOUT",LOGOUT));
     //Follow request = 4
-    this->commandDictionary.insert(std::pair<string,short>("FOLLOW",4));
+    this->commandDictionary.insert(std::pair<string,short>("FOLLOW",FOLLOW));
     //Post request = 5
-    this->commandDictionary.insert(std::pair<string,short>("POST",5));
+    this->commandDictionary.insert(std::pair<string,short>("POST",POST));
     //PM request = 6
-    this->commandDictionary.insert(std::pair<string,short>("PM",6));
+    this->commandDictionary.insert(std::pair<string,short>("PM",PM));
     //UserList request = 7
-    this->commandDictionary.insert(std::pair<string,short>("USERLIST",7));
+    this->commandDictionary.insert(std::pair<string,short>("USERLIST",USERLIST));
     //Stat request = 8
-    this->commandDictionary.insert(std::pair<string,short>("STAT",8));
+    this->commandDictionary.insert(std::pair<string,short>("STAT",STAT));
     this->zeroDelimiter = '\0';
 }
 
-/**
- * Converting Char array to a Short number
- * @param bytesArr              Char array to convert
- * @return        Short number that is the bytes value of what was in the bytes array
- */
-short EncoderDecoder::bytesToShort(char *bytesArr) {
-    short result = (short)((bytesArr[0] & 0xff) << 8);
-    result += (short)(bytesArr[1] & 0xff);
-    return result;
-}
+
+
+
+
+    //region Encoding Functions
+
 
 /**
- * Converting a short number to array of chars
- * @param num               short number to convert
- * @param bytesArr          Char array to put the number into
- */
+* Converting a short number to array of chars
+* @param num               short number to convert
+* @param bytesArr          Char array to put the number into
+*/
 void EncoderDecoder::shortToBytes(short num, char *bytesArr) {
     bytesArr[0] = ((num >> 8) & 0xFF);
     bytesArr[1] = (num & 0xFF);
 }
 
+
 /**
- * Convert the input string from the client to a char array to send to the server.
- * @param input         String represent the user input
- * @return              Char* represent a bytes array to send to the server to process
- */
+* Convert the input string from the client to a char array to send to the server.
+* @param input         String represent the user input
+* @return              Char* represent a bytes array to send to the server to process
+*/
 char* EncoderDecoder::stringToMessage(std::string input) {
     char *ch_Opcode[2];
     std::locale loc;
@@ -93,8 +90,6 @@ char* EncoderDecoder::stringToMessage(std::string input) {
             return postOrStatToMessage(input, *ch_Opcode);
     }
 }
-
-    //region Encoding Functions
 
 /**
  * Part of the StringToMessage function
@@ -269,6 +264,18 @@ char* EncoderDecoder::pmToMessage(std::string input, char *ch_Opcode) {
 //endregion Encoding Functions
 
     //region Decoding Functions
+
+/**
+* Converting Char array to a Short number
+* @param bytesArr              Char array to convert
+* @return        Short number that is the bytes value of what was in the bytes array
+*/
+short EncoderDecoder::bytesToShort(char *bytesArr) {
+    short result = (short)((bytesArr[0] & 0xff) << 8);
+    result += (short)(bytesArr[1] & 0xff);
+    return result;
+}
+
 /**
 * Convert the short number represents the opcode of the message to the message type string
 * @param opcode            short number represent the opcode of the message type
@@ -336,14 +343,14 @@ int EncoderDecoder::insertCharsToOutput(char *messageFromServer, string &output,
  * @return              String representation of the message from the server.
  */
 std::string EncoderDecoder::ackToString(char *messageFromServer) {
-    short opcode = getOpcodeFromMessageFromServer(messageFromServer);
+    short opcode = gettingShortFromCharArray(messageFromServer,2);
     switch(opcode){
         case FOLLOW:
-            return;
+            return std::to_string(opcode) + " " + followOrUserListAckToString(messageFromServer);
         case USERLIST:
-            return;
+            return std::to_string(opcode) + " " + followOrUserListAckToString(messageFromServer);
         case STAT:
-            return;
+            return std::to_string(opcode) + " " + statAckToString(messageFromServer);
         default:
             //in case it's one of the following:
             // 1.Register
@@ -357,30 +364,69 @@ std::string EncoderDecoder::ackToString(char *messageFromServer) {
 }
 
 /**
+* Part of the "ackToString" functions.
+* translating all the information in the given array from the server as it was an Follow Or UserList Ack Message.
+* @param messageFromServer             Char array that was received from the server.
+* @return      String representation of the given array as a Follow Or UserList Ack message.
+*/
+std::string EncoderDecoder::followOrUserListAckToString(char *messageFromServer) {
+    std::string output;
+    short numberOfUsers = gettingShortFromCharArray(messageFromServer,4);
+    output.append(std::to_string(numberOfUsers));
+    int index = 6;
+    for(int i = 0 ; i<numberOfUsers;i++){
+        output.append(" ");
+        index = insertCharsToOutput(messageFromServer,output,index);
+    }
+
+    return output;
+}
+
+/**
+ * Part of the "ackToString" functions.
+ * translating all the information in the given array from the server as it was an stat Ack Message.
+ * @param messageFromServer             Char array that was received from the server.
+ * @return      String representation of the given array as a stat Ack message.
+ */
+std::string EncoderDecoder::statAckToString(char *messageFromServer) {
+    std::string output;
+    //adding number of posts.
+    output.append(std::to_string(gettingShortFromCharArray(messageFromServer,4)));
+    output.append(" ");
+    //adding number of followers
+    output.append(std::to_string(gettingShortFromCharArray(messageFromServer,6)));
+    output.append(" ");
+    //adding number of following
+    output.append(std::to_string(gettingShortFromCharArray(messageFromServer,8)));
+    return output;
+}
+
+/**
  * part of the messageToString Function;
  * convert the char array to String error message to display on the screen to the client
  * @param messageFromServer             Char Array that was recieved from the server
  * @return              String representation of the message from the server.
  */
 std::string EncoderDecoder::errorToString(char *messageFromServer) {
-    short opcode = getOpcodeFromMessageFromServer(messageFromServer);
+    short opcode = gettingShortFromCharArray(messageFromServer, 2);
     //returning the number type of the error
     return std::to_string(opcode);
-
 }
+
 /**
-* Part Of the "ackToString" and "errorToString"
-* converting from the message tha was received from the server what type of message failed or succeeded.
-* @param messageFromServer             Char array that was received from the server.
-* @return
-*/
-short EncoderDecoder::getOpcodeFromMessageFromServer(char *messageFromServer) {
-    char* errorTypeArray[2];
+ * Taking the first two chars from the given index from the given char array and convert them to short number.
+ * @param input                 char array to take the number from
+ * @param startIndex            integer index to start taking the number from
+ * @return                      Short number that was taken from the first two bytes from the given array.
+ */
+short EncoderDecoder::gettingShortFromCharArray(char *input, int startIndex) {
+    char* number[2];
     //getting the error type from the array.
-    errorTypeArray[0] = &messageFromServer[2];
-    errorTypeArray[1] = &messageFromServer[3];
-    short opcode = bytesToShort(*errorTypeArray);
-    return opcode;
+    number[0] = &input[startIndex];
+    startIndex++;
+    number[1] = &input[startIndex];
+    short output = bytesToShort(*number);
+    return output;
 }
 
 //endregion Decoding Functions
