@@ -5,6 +5,7 @@
 #include <map>
 #include <iostream>
 #include <boost/asio.hpp>
+#include "EncoderDecoder.h"
 
 using boost::asio::ip::tcp;
 
@@ -14,8 +15,7 @@ private:
 	const short port_;
 	boost::asio::io_service io_service_;   // Provides core I/O functionality
 	tcp::socket socket_;
-	std::map<std::string,short> commandDictionary;
-	char delimiter = '\0';
+	EncoderDecoder endDec;
  
 public:
     ConnectionHandler(std::string host, short port);
@@ -50,26 +50,6 @@ public:
 	
     // Close down the connection properly.
     void close();
-
-    //convert bytes to short
-    short bytesToShort(char* bytesArr);
-
-    //convert short to bytes
-    void shortToBytes(short num, char* bytesArr);
-
-    char* stringToMessage(std::string input);
-
-    char* registerAndLoginToMessage(std::string input, char *ch_Opcode);
-
-    char* followToMessage(std::string input, char *ch_Opcode);
-
-    void insertElementsToFollowInput(char *ch_Opcode, char &yesOrNo, std::vector<std::string> &names,
-                                     char* output);
-
-    char* postOrStatToMessage(std::string input, char *ch_Opcode);
-
-    char* pmToMessage(std::string input, char *ch_Opcode);
-
 
 }; //class ConnectionHandler
  
