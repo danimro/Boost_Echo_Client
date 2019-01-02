@@ -95,6 +95,8 @@ char* EncoderDecoder::stringToMessage(std::string input) {
     }
 }
 
+    //region Encoding Functions
+
 /**
  * Part of the StringToMessage function
  * when the message is identified as a Login or Register request -->
@@ -264,3 +266,13 @@ char* EncoderDecoder::pmToMessage(std::string input, char *ch_Opcode) {
     output[index] = &this->zeroDelimiter;
     return *output;
 }
+
+//endregion Encoding Functions
+
+    //region Decoding Functions
+
+std::string EncoderDecoder::messageToString(char *messageFromServer) {
+    
+}
+
+    //endregion Decoding Functions

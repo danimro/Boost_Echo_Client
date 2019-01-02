@@ -41,6 +41,9 @@ class EncoderDecoder{
          */
         char* stringToMessage(std::string input);
 
+
+        std::string messageToString(char* messageFromServer);
+
         /**
          * default Destructor
          */
