@@ -9,43 +9,66 @@
 #include <vector>
 #include <map>
 
+/**
+ * Enum to identify each Opcode
+ */
+enum Opcode{
+    REGISTER = 1,
+    LOGIN = 2,
+    LOGOUT = 3,
+    FOLLOW = 4,
+    POST = 5,
+    PM = 6,
+    USERLIST = 7,
+    STAT = 8,
+    NOTIFICATION = 9,
+    ACK = 10,
+    ERROR = 11
+};
+
+
 class EncoderDecoder{
+
     public:
         /**
-         * Default constructor
+         * Default constructor.
          */
         EncoderDecoder() = default;
 
        /**
-        * Initialising the delimiter, and the values of the Messages's opcodes
+        * Initialising the delimiter, and the values of the Messages's opcodes.
         */
         void init();
 
         /**
-         * Converting Char array to a Short number
-         * @param bytesArr              Char array to convert
-         * @return        Short number that is the bytes value of what was in the bytes array
+         * Converting Char array to a Short number.
+         * @param bytesArr              Char array to convert.
+         * @return        Short number that is the bytes value of what was in the bytes array.
          */
         short bytesToShort(char* bytesArr);
 
         /**
-         * Converting a short number to array of chars
-         * @param num               short number to convert
-         * @param bytesArr          Char array to put the number into
+         * Converting a short number to array of chars.
+         * @param num               short number to convert.
+         * @param bytesArr          Char array to put the number into.
          */
         void shortToBytes(short num, char* bytesArr);
         /**
          * Convert the input string from the client to a char array to send to the server.
-         * @param input         String represent the user input
-         * @return              Char* represent a bytes array to send to the server to process
+         * @param input         String represent the user input.
+         * @return              Char* represent a bytes array to send to the server to process.
          */
         char* stringToMessage(std::string input);
 
-
+       /**
+        * Convert the short number represents the opcode of the message to the message type string.
+        * @param opcode            short number represent the opcode of the message type.
+        * @return      string represents the message type.
+        */
         std::string messageToString(char* messageFromServer);
 
         /**
-         * default Destructor
+         * default Destructor.
          */
         ~EncoderDecoder() = default;
     private:
@@ -53,11 +76,11 @@ class EncoderDecoder{
         //region Fields
 
         /**
-         * Map of string as keys, and short as values, to connect betwwen type of user request to it's matching OpCode
+         * Map of string as keys, and short as values, to connect between type of user request to it's matching OpCode.
          */
         std::map<std::string,short> commandDictionary;
         /**
-         * Char of '0' used as delimiter in the communication between the client and the server
+         * Char of '0' used as delimiter in the communication between the client and the server.
          */
         char zeroDelimiter;
 
@@ -113,8 +136,50 @@ class EncoderDecoder{
 
         //endregion Encoding Functions
 
+        //region Decoding Functions
+
+        /**
+         * part of the messageToString Function.
+         * convert the char array to String notification message to display on the screen to the client.
+         * @param messageFromServer             Char Array that was recieved from the server.
+         * @return              String representation of the message from the server.
+         */
+        std::string notificationToString(char* messageFromServer);
+
+        /**
+         * part of the messageToString Function.
+         * convert the char array to String ack message to display on the screen to the client.
+         * @param messageFromServer             Char Array that was recieved from the server.
+         * @return              String representation of the message from the server.
+         */
+        std::string ackToString(char* messageFromServer);
+        /**
+         * part of the messageToString Function.
+         * convert the char array to String error message to display on the screen to the client.
+         * @param messageFromServer             Char Array that was recieved from the server.
+         * @return              String representation of the message from the server.
+         */
+        std::string errorToString(char* messageFromServer);
+
+        /**
+         * Insert to chars to string until it reaches the delimiter.
+         * @param messageFromServer             Char* recieved by the server.
+         * @param output                        String to add the chars to.
+         * @param index                         current index of the "messageFromServer" array.
+         * @return                              Integer represents the current free index of the given output array.
+         */
+        int insertCharsToOutput(char *messageFromServer, std::string &output, int index);
 
 
+        /**
+         * Part Of the "ackToString" and "errorToString"
+         * converting from the message tha was received from the server what type of message failed or succeeded.
+         * @param messageFromServer             Char array that was received from the server.
+         * @return
+         */
+        short getOpcodeFromMessageFromServer(char *messageFromServer);
+
+        //endregion Decoding Functions
 };
 
 

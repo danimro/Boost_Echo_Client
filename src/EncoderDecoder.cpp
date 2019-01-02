@@ -67,26 +67,25 @@ char* EncoderDecoder::stringToMessage(std::string input) {
     short opcode = this->commandDictionary.at(command);
     this->shortToBytes(opcode, *ch_Opcode);
     switch (opcode) {
-        case 1:
+        case REGISTER:
             //register case
             return registerAndLoginToMessage(input, *ch_Opcode);
-
-        case 2:
+        case LOGIN:
             //login case
             return registerAndLoginToMessage(input, *ch_Opcode);
-        case 3:
+        case LOGOUT:
             //logout case
             return *ch_Opcode;
-        case 4:
+        case FOLLOW:
             //follow case
             return followToMessage(input, *ch_Opcode);
-        case 5:
+        case POST:
             //post case
             return postOrStatToMessage(input, *ch_Opcode);
-        case 6:
+        case PM:
             //pm case
             return pmToMessage(input, *ch_Opcode);
-        case 7:
+        case USERLIST:
             //User list case
             return *ch_Opcode;
         default:
@@ -270,9 +269,118 @@ char* EncoderDecoder::pmToMessage(std::string input, char *ch_Opcode) {
 //endregion Encoding Functions
 
     //region Decoding Functions
-
+/**
+* Convert the short number represents the opcode of the message to the message type string
+* @param opcode            short number represent the opcode of the message type
+* @return      string represents the message type
+*/
 std::string EncoderDecoder::messageToString(char *messageFromServer) {
-    
+
+    short incomingMessageOpcode = bytesToShort(messageFromServer);
+    switch(incomingMessageOpcode){
+        case NOTIFICATION:
+            return "NOTIFICATION " + notificationToString(messageFromServer);
+        case ACK:
+            return "ACK " + ackToString(messageFromServer);
+        default:
+            return "ERROR " + errorToString(messageFromServer);
+
+    }
 }
 
-    //endregion Decoding Functions
+/**
+* part of the messageToString Function;
+* convert the char array to String notification message to display on the screen to the client
+* @param messageFromServer             Char Array that was recieved from the server
+* @return              String representation of the message from the server.
+*/
+std::string EncoderDecoder::notificationToString(char *messageFromServer) {
+    std::string output;
+    char notificationType = messageFromServer[2];
+    if(notificationType == '0'){
+        //PM message
+        output.append("PM ");
+    }
+    else{
+        //Post Message
+        output.append("Public ");
+    }
+    int index = 3;
+    //inserting the posting username
+    index = insertCharsToOutput(messageFromServer, output, index);
+    output.append(" ");
+    //inserting the content of the message
+    index = insertCharsToOutput(messageFromServer, output, index);
+    return output;
+}
+
+/**
+* Insert to chars to string until it reaches the delimiter
+* @param messageFromServer             Char* recieved by the server
+* @param output                        String to add the chars to
+* @param index                         current index of the "messageFromServer" array.
+* @return
+*/
+int EncoderDecoder::insertCharsToOutput(char *messageFromServer, string &output, int index) {
+    while(messageFromServer[index] != zeroDelimiter){
+        output.append(to_string(messageFromServer[index]));
+        index++;
+    }
+    return index;
+}
+
+/**
+ * part of the messageToString Function;
+ * convert the char array to String ack message to display on the screen to the client
+ * @param messageFromServer             Char Array that was recieved from the server
+ * @return              String representation of the message from the server.
+ */
+std::string EncoderDecoder::ackToString(char *messageFromServer) {
+    short opcode = getOpcodeFromMessageFromServer(messageFromServer);
+    switch(opcode){
+        case FOLLOW:
+            return;
+        case USERLIST:
+            return;
+        case STAT:
+            return;
+        default:
+            //in case it's one of the following:
+            // 1.Register
+            // 2.Login
+            // 3.Logout
+            // 4.Post
+            // 5.Pm
+            return std::to_string(opcode);
+
+    }
+}
+
+/**
+ * part of the messageToString Function;
+ * convert the char array to String error message to display on the screen to the client
+ * @param messageFromServer             Char Array that was recieved from the server
+ * @return              String representation of the message from the server.
+ */
+std::string EncoderDecoder::errorToString(char *messageFromServer) {
+    short opcode = getOpcodeFromMessageFromServer(messageFromServer);
+    //returning the number type of the error
+    return std::to_string(opcode);
+
+}
+/**
+* Part Of the "ackToString" and "errorToString"
+* converting from the message tha was received from the server what type of message failed or succeeded.
+* @param messageFromServer             Char array that was received from the server.
+* @return
+*/
+short EncoderDecoder::getOpcodeFromMessageFromServer(char *messageFromServer) {
+    char* errorTypeArray[2];
+    //getting the error type from the array.
+    errorTypeArray[0] = &messageFromServer[2];
+    errorTypeArray[1] = &messageFromServer[3];
+    short opcode = bytesToShort(*errorTypeArray);
+    return opcode;
+}
+
+//endregion Decoding Functions

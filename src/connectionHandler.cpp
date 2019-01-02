@@ -83,20 +83,33 @@ bool ConnectionHandler::sendLine(std::string& line) {
  
 bool ConnectionHandler::getFrameAscii(std::string& frame, char delimiter) {
     char ch;
+    std::vector<char> message;
+    int index = 0;
     // Stop when we encounter the null character. 
     // Notice that the null character is not appended to the frame string.
     try {
 		do{
 			getBytes(&ch, 1);
-            frame.append(1, ch);
+			message.push_back(ch);
+            //frame.append(1, ch);
         }while (delimiter != ch);
     } catch (std::exception& e) {
         std::cerr << "recv failed (Error: " << e.what() << ')' << std::endl;
         return false;
     }
+    frame = this->endDec.messageToString(convertToArray(message, index));
     return true;
 }
- 
+
+char* ConnectionHandler::convertToArray(std::vector<char> &message, int index){
+    char* messageArray[message.size()];
+    for(char &current:message){
+        messageArray[index] = &current;
+        index++;
+    }
+    return *messageArray;
+}
+
 bool ConnectionHandler::sendFrameAscii(const std::string& frame, char delimiter) {
     //string is converted to a char array the server can understand.
     char* toSend = this->endDec.stringToMessage(frame);
@@ -114,7 +127,6 @@ void ConnectionHandler::close() {
     }
 }
 
-//endregion converting user input functions
 
 
 

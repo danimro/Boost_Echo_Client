@@ -51,6 +51,7 @@ public:
     // Close down the connection properly.
     void close();
 
+    char* convertToArray(std::vector<char> &message, int index);
 }; //class ConnectionHandler
  
 #endif
