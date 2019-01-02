@@ -15,8 +15,8 @@ class EncoderDecoder{
          * Default constructor
          */
         EncoderDecoder() = default;
-        
-        /**
+
+       /**
         * Initialising the delimiter, and the values of the Messages's opcodes
         */
         void init();
@@ -40,15 +40,15 @@ class EncoderDecoder{
          * @return              Char* represent a bytes array to send to the server to process
          */
         char* stringToMessage(std::string input);
+
         /**
-         * Part of the StringToMessage function
-         * when the message is identified as a Login or Register request -->
-         * processing the rest of the string by the user as a Login or Register (according to the OpCode) Message Type.
-         * @param input                 String represent the input that was entered by the user.
-         * @param ch_Opcode             char array represents the Opcode of this message.
-         * @return      Char Array that represents the final Login or Register message
+         * default Destructor
          */
+        ~EncoderDecoder() = default;
     private:
+
+        //region Fields
+
         /**
          * Map of string as keys, and short as values, to connect betwwen type of user request to it's matching OpCode
          */
@@ -58,6 +58,18 @@ class EncoderDecoder{
          */
         char zeroDelimiter;
 
+        //endregion Fields
+
+        //region Encoding Functions
+
+        /**
+         * Part of the StringToMessage function
+         * when the message is identified as a Login or Register request -->
+         * processing the rest of the string by the user as a Login or Register (according to the OpCode) Message Type.
+         * @param input                 String represent the input that was entered by the user.
+         * @param ch_Opcode             char array represents the Opcode of this message.
+         * @return      Char Array that represents the final Login or Register message
+         */
         char* registerAndLoginToMessage(std::string input, char *ch_Opcode);
         /**
          * Part of the StringToMessage function
@@ -96,10 +108,10 @@ class EncoderDecoder{
          */
         char* pmToMessage(std::string input, char *ch_Opcode);
 
-        /**
-         * default Destructor
-         */
-        ~EncoderDecoder() = default;
+        //endregion Encoding Functions
+
+
+
 };
 
 
