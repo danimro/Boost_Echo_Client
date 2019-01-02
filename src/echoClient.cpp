@@ -24,7 +24,7 @@ private:
 public:
     ConnectionServer(ConnectionHandler* connectionHandler):ch(connectionHandler){}
     void run(){
-        while(1){
+        while(true){
             std::string answer;
             if (!ch->getLine(answer)) {
                 std::cout << "Disconnected. Exiting...\n" << std::endl;
@@ -35,8 +35,8 @@ public:
 
             answer.resize(len-1);
             std::cout << answer << std::endl;
-            //todo change this string
-            if (answer == "ACK signout succeeded") {
+            //todo check this string
+            if (answer.compare("ACK 3") == 0) {
                 std::cout << "Ready to exit. Press enter\n" << std::endl;
                 break;
             }
@@ -52,8 +52,7 @@ public:
     IOTask(ConnectionHandler *connectionHandler) : ch(connectionHandler),isLoggedOut(false) {}
 
     void run() {
-        while (true) {
-
+        while(true) {
             string userRequest;
             std::getline(std::cin ,userRequest);
             std::locale loc;
@@ -79,7 +78,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     std::string host = argv[1];
-    short port = atoi(argv[2]);
+    short port = (short)atoi(argv[2]);
 
     ConnectionHandler connectionHandler(host, port);
     if (!connectionHandler.connect()) {

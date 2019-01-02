@@ -44,6 +44,21 @@ class EncoderDecoder{
          * default Destructor.
          */
         ~EncoderDecoder() = default;
+
+        /**
+         * Convert the input string from the client to a char array to send to the server.
+         * @param input         String represent the user input.
+         * @return              Char* represent a bytes array to send to the server to process.
+         */
+        char* stringToMessage(std::string input);
+
+        /**
+         * Convert the short number represents the opcode of the message to the message type string.
+         * @param opcode            short number represent the opcode of the message type.
+         * @return      string represents the message type.
+         */
+        std::string messageToString(char* messageFromServer);
+
     private:
 
         //region Fields
@@ -68,12 +83,7 @@ class EncoderDecoder{
          */
         void shortToBytes(short num, char* bytesArr);
 
-        /**
-         * Convert the input string from the client to a char array to send to the server.
-         * @param input         String represent the user input.
-         * @return              Char* represent a bytes array to send to the server to process.
-         */
-        char* stringToMessage(std::string input);
+
 
         /**
          * Part of the StringToMessage function
@@ -125,12 +135,7 @@ class EncoderDecoder{
 
         //region Decoding Functions
 
-        /**
-        * Convert the short number represents the opcode of the message to the message type string.
-        * @param opcode            short number represent the opcode of the message type.
-        * @return      string represents the message type.
-        */
-        std::string messageToString(char* messageFromServer);
+
 
         /**
          * part of the messageToString Function.

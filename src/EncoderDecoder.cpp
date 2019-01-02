@@ -31,12 +31,7 @@ void EncoderDecoder::init() {
     this->zeroDelimiter = '\0';
 }
 
-
-
-
-
     //region Encoding Functions
-
 
 /**
 * Converting a short number to array of chars
@@ -140,7 +135,7 @@ char* EncoderDecoder::followToMessage(std::string input, char *ch_Opcode) {
         yesOrNo = '0';
     }
     else{
-        // unfollow case
+        //unfollow case
         yesOrNo = '1';
     }
     //taking the number of users in the list from the user input
@@ -298,7 +293,7 @@ std::string EncoderDecoder::messageToString(char *messageFromServer) {
 /**
 * part of the messageToString Function;
 * convert the char array to String notification message to display on the screen to the client
-* @param messageFromServer             Char Array that was recieved from the server
+* @param messageFromServer             Char Array that was received from the server
 * @return              String representation of the message from the server.
 */
 std::string EncoderDecoder::notificationToString(char *messageFromServer) {
@@ -323,7 +318,7 @@ std::string EncoderDecoder::notificationToString(char *messageFromServer) {
 
 /**
 * Insert to chars to string until it reaches the delimiter
-* @param messageFromServer             Char* recieved by the server
+* @param messageFromServer             Char* received by the server
 * @param output                        String to add the chars to
 * @param index                         current index of the "messageFromServer" array.
 * @return
@@ -339,7 +334,7 @@ int EncoderDecoder::insertCharsToOutput(char *messageFromServer, string &output,
 /**
  * part of the messageToString Function;
  * convert the char array to String ack message to display on the screen to the client
- * @param messageFromServer             Char Array that was recieved from the server
+ * @param messageFromServer             Char Array that was received from the server
  * @return              String representation of the message from the server.
  */
 std::string EncoderDecoder::ackToString(char *messageFromServer) {
