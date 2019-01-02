@@ -33,7 +33,7 @@ class EncoderDecoder{
         /**
          * Default constructor.
          */
-        EncoderDecoder() = default;
+        EncoderDecoder();
 
        /**
         * Initialising the delimiter, and the values of the Messages's opcodes.

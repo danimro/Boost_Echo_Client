@@ -8,6 +8,11 @@
 
 using namespace std;
 
+
+EncoderDecoder::EncoderDecoder() : commandDictionary(), zeroDelimiter('\0')  {
+
+}
+
 /**
  * Initialising the delimiter, and the values of the Messages's opcodes
  */
@@ -181,11 +186,11 @@ void EncoderDecoder::insertElementsToFollowInput(char *ch_Opcode, char &yesOrNo,
     //inserting the yesOrNo char
     output[2] = yesOrNo;
     int index = 3;
-    for(int i = 0; i < names.size(); i++){
+    for (auto &name : names) {
         //for each name in the vector
-        for(int j = 0; j<names[i].length(); j++){
+        for (char j : name) {
             //inserting all the letters of the user
-            output[index] = names[i].at(j);
+            output[index] = j;
             index++;
         }
         //after each name --> putting the '\0' delimiter.

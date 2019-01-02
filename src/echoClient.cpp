@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include <iostream>
 #include <boost/thread.hpp>
-#include "../include/connectionHandler.h"
+#include "connectionHandler.h"
 #include <boost/algorithm/string.hpp>
+#include <IOTask.h>
+#include <ConnectionServer.h>
 
 using namespace boost;
 using namespace std;
@@ -18,7 +20,32 @@ using std::cerr;
 using std::endl;
 using std::string;
 
-class ConnectionServer{
+int main(int argc, char *argv[]) {
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0] << " host port" << std::endl << std::endl;
+        return -1;
+    }
+    std::string host = argv[1];
+    auto port = (short)atoi(argv[2]);
+
+    ConnectionHandler connectionHandler(host, port);
+    if (!connectionHandler.connect()) {
+        std::cerr << "Cannot connect to " << host << ":" << port << std::endl;
+        return 1;
+    }
+    IOTask IO(&connectionHandler);
+    boost::thread IOThread(&IOTask::run,&IO);
+    ConnectionServer Com(&connectionHandler);
+    boost::thread ComThread(&ConnectionServer::run, &Com);
+
+    IOThread.join();
+    ComThread.join();
+    return 0;
+}
+
+
+
+/*class ConnectionServer{
 private:
     ConnectionHandler* ch;
 public:
@@ -31,11 +58,10 @@ public:
                 break;
             }
 
-            int len=answer.length();
+            unsigned long len=answer.length();
 
             answer.resize(len-1);
             std::cout << answer << std::endl;
-            //todo check this string
             if (answer.compare("ACK 3") == 0) {
                 std::cout << "Ready to exit. Press enter\n" << std::endl;
                 break;
@@ -56,7 +82,7 @@ public:
             string userRequest;
             std::getline(std::cin ,userRequest);
             std::locale loc;
-            int len = userRequest.length();
+            unsigned long len = userRequest.length();
             if (!ch->sendLine(userRequest)) {
                 std::cout << "Disconnected. Exiting...\n" << std::endl;
                 break;
@@ -70,27 +96,5 @@ public:
 
         }
     };
-};
+};*/
 
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        std::cerr << "Usage: " << argv[0] << " host port" << std::endl << std::endl;
-        return -1;
-    }
-    std::string host = argv[1];
-    short port = (short)atoi(argv[2]);
-
-    ConnectionHandler connectionHandler(host, port);
-    if (!connectionHandler.connect()) {
-        std::cerr << "Cannot connect to " << host << ":" << port << std::endl;
-        return 1;
-    }
-    IOTask IO(&connectionHandler);
-    boost::thread IOThread(&IOTask::run,&IO);
-    ConnectionServer Com(&connectionHandler);
-    boost::thread ComThread(&ConnectionServer::run, &Com);
-
-    IOThread.join();
-    ComThread.join();
-    return 0;
-}

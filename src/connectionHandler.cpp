@@ -13,7 +13,7 @@ using std::string;
 /**
  * Default constructor
  */
-ConnectionHandler::ConnectionHandler(string host, short port): host_(std::move(host)), port_(port), io_service_(), socket_(io_service_),endDec(){
+ConnectionHandler::ConnectionHandler(string host, short port): host_(host), port_(port), io_service_(), socket_(io_service_),endDec(){
     //initialising the values of the encoder decoder
     this->endDec.init();
 }
