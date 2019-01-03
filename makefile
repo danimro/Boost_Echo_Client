@@ -3,7 +3,7 @@ LDFLAGS:=-lboost_system -lboost_thread -lboost_locale
 
 all: BGSclient
 	g++ -o bin/BGSclient bin/connectionHandler.o bin/IOTask.o bin/ConnectionServer.o bin/EncoderDecoder.o bin/echoClient.o $(LDFLAGS)
-
+	@echo 'finished building'
 BGSclient: bin/connectionHandler.o bin/IOTask.o bin/ConnectionServer.o bin/EncoderDecoder.o bin/echoClient.o
 
 
@@ -26,3 +26,4 @@ bin/echoClient.o: src/echoClient.cpp
 .PHONY: clean
 clean:
 	rm -f bin/*
+	@echo 'finished clean'

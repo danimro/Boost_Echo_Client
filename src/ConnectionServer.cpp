@@ -8,15 +8,14 @@ ConnectionServer::ConnectionServer(ConnectionHandler* connectionHandler):ch(conn
 
 void ConnectionServer::run() {
     while(true){
-        std::string answer;
-        if (!ch->getLine(answer)) {
+        std::string answer = ch->translateMessage();
+        /*if (!ch->getFrameAscii(answer)) {
             std::cout << "Disconnected. Exiting...\n" << std::endl;
             break;
-        }
+        }*/
 
-        unsigned long len=answer.length();
+        unsigned long len = answer.length();
 
-        answer.resize(len-1);
         std::cout << answer << std::endl;
         if (answer == "ACK 3") {
             std::cout << "Ready to exit. Press enter\n" << std::endl;

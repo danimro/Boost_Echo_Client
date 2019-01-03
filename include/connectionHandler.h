@@ -52,6 +52,9 @@ public:
     void close();
 
     char* convertToArray(std::vector<char> &message, int index);
+
+    std::string translateMessage();
+
 }; //class ConnectionHandler
  
 #endif

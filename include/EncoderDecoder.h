@@ -50,7 +50,7 @@ class EncoderDecoder{
          * @param input         String represent the user input.
          * @return              Char* represent a bytes array to send to the server to process.
          */
-        char* stringToMessage(std::string input);
+        std::vector<char> stringToMessage(std::string input);
 
         /**
          * Convert the short number represents the opcode of the message to the message type string.
@@ -58,6 +58,20 @@ class EncoderDecoder{
          * @return      string represents the message type.
          */
         std::string messageToString(char* messageFromServer);
+
+        /**
+         * Converting Char array to a Short number.
+         * @param bytesArr              Char array to convert.
+         * @return        Short number that is the bytes value of what was in the bytes array.
+         */
+        short bytesToShort(char* bytesArr);
+
+        /**
+         * Converting a short number to array of chars.
+         * @param num               short number to convert.
+         * @param bytesArr          Char array to put the number into.
+         */
+        void shortToBytes(short num, char bytesArr[]);
 
     private:
 
@@ -76,12 +90,7 @@ class EncoderDecoder{
 
         //region Encoding Functions
 
-        /**
-         * Converting a short number to array of chars.
-         * @param num               short number to convert.
-         * @param bytesArr          Char array to put the number into.
-         */
-        void shortToBytes(short num, char* bytesArr);
+
 
 
 
@@ -93,7 +102,7 @@ class EncoderDecoder{
          * @param ch_Opcode             char array represents the Opcode of this message.
          * @return      Char Array that represents the final Login or Register message
          */
-        char* registerAndLoginToMessage(std::string input, char *ch_Opcode);
+        void registerAndLoginToMessage(std::string input, char *ch_Opcode, std::vector<char> &output);
         /**
          * Part of the StringToMessage function
          * when the message is identified as a follow request --> processing the rest of the string by the user as a Follow Message Type.
@@ -101,7 +110,7 @@ class EncoderDecoder{
          * @param ch_Opcode             char array represents the Opcode of this message.
          * @return      Char Array that represents the final follow message
          */
-        char* followToMessage(std::string input, char *ch_Opcode);
+        void followToMessage(std::string input, char *ch_Opcode, std::vector<char> &output);
         /**
          * Part of the FollowToMessage
          * combining all the char array that represents a Follow message,
@@ -112,7 +121,7 @@ class EncoderDecoder{
          * @param output                Char array to bput all the given information in, in the correct order
          */
         void insertElementsToFollowInput(char *ch_Opcode, char &yesOrNo, std::vector<std::string> &names,
-                                         char* output);
+                                         std::vector<char> &output);
         /**
          * Part of the StringToMessage function
          * when the message is identified as a Stat or Post request -->
@@ -121,7 +130,7 @@ class EncoderDecoder{
          * @param ch_Opcode             char array represents the Opcode of this message.
          * @return      Char Array that represents the final PM or Stat message
          */
-        char* postOrStatToMessage(std::string input, char *ch_Opcode);
+        void postOrStatToMessage(std::string input, char *ch_Opcode, std::vector<char> &output);
         /**
          * Part of the StringToMessage function
          * when the message is identified as a PM request --> processing the rest of the string by the user as a PM Message Type.
@@ -129,7 +138,7 @@ class EncoderDecoder{
          * @param ch_Opcode             char array represents the Opcode of this message.
          * @return      Char Array that represents the final PM message
          */
-        char* pmToMessage(std::string input, char *ch_Opcode);
+         void pmToMessage(std::string input, char *ch_Opcode, std::vector<char> &output);
 
         //endregion Encoding Functions
 
@@ -195,12 +204,7 @@ class EncoderDecoder{
          */
          short gettingShortFromCharArray(char* input,int startIndex);
 
-         /**
-         * Converting Char array to a Short number.
-         * @param bytesArr              Char array to convert.
-         * @return        Short number that is the bytes value of what was in the bytes array.
-         */
-         short bytesToShort(char* bytesArr);
+
 
         //endregion Decoding Functions
 };

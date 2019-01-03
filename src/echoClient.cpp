@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <thread>
 #include <boost/thread.hpp>
 #include "connectionHandler.h"
 #include <boost/algorithm/string.hpp>
@@ -34,9 +35,9 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     IOTask IO(&connectionHandler);
-    boost::thread IOThread(&IOTask::run,&IO);
+    std::thread IOThread(&IOTask::run,&IO);
     ConnectionServer Com(&connectionHandler);
-    boost::thread ComThread(&ConnectionServer::run, &Com);
+    std::thread ComThread(&ConnectionServer::run, &Com);
 
     IOThread.join();
     ComThread.join();

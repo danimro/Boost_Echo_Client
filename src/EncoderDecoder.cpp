@@ -1,9 +1,12 @@
+#include <utility>
+
 //
 // Created by tomer on 02/01/19.
 //
 
 
 #include <EncoderDecoder.h>
+#include <boost/algorithm/string.hpp>
 #include <locale>
 
 using namespace std;
@@ -43,7 +46,7 @@ void EncoderDecoder::init() {
 * @param num               short number to convert
 * @param bytesArr          Char array to put the number into
 */
-void EncoderDecoder::shortToBytes(short num, char *bytesArr) {
+void EncoderDecoder::shortToBytes(short num, char bytesArr[]) {
     bytesArr[0] = ((num >> 8) & 0xFF);
     bytesArr[1] = (num & 0xFF);
 }
@@ -54,41 +57,52 @@ void EncoderDecoder::shortToBytes(short num, char *bytesArr) {
 * @param input         String represent the user input
 * @return              Char* represent a bytes array to send to the server to process
 */
-char* EncoderDecoder::stringToMessage(std::string input) {
-    char *ch_Opcode[2];
-    std::locale loc;
+std::vector<char> EncoderDecoder::stringToMessage(std::string input) {
+    char ch_Opcode[2];
+    std::vector<char> output;
     // taking the first word of the sentence to process which kind of request it is from the user
-    std::string command = std::toupper(input.substr(0, input.find_first_of(" ")), loc);
+    std::string command = boost::to_upper_copy<std::string>(input.substr(0,input.find_first_of(" ")));
     input = input.substr(input.find_first_of(" ") + 1);
     //translating the first word to a Opcode using the commandDictionary.
     short opcode = this->commandDictionary.at(command);
-    this->shortToBytes(opcode, *ch_Opcode);
+    this->shortToBytes(opcode,ch_Opcode);
     switch (opcode) {
         case REGISTER:
             //register case
-            return registerAndLoginToMessage(input, *ch_Opcode);
+            registerAndLoginToMessage(input, ch_Opcode,output);
+            break;
         case LOGIN:
             //login case
-            return registerAndLoginToMessage(input, *ch_Opcode);
+            registerAndLoginToMessage(input, ch_Opcode,output);
+            break;
         case LOGOUT:
             //logout case
-            return *ch_Opcode;
+            output.push_back(ch_Opcode[0]);
+            output.push_back(ch_Opcode[1]);
+            break;
         case FOLLOW:
             //follow case
-            return followToMessage(input, *ch_Opcode);
+            followToMessage(input, ch_Opcode,output);
+            break;
         case POST:
             //post case
-            return postOrStatToMessage(input, *ch_Opcode);
+            postOrStatToMessage(input, ch_Opcode,output);
+            break;
         case PM:
             //pm case
-            return pmToMessage(input, *ch_Opcode);
+            pmToMessage(input, ch_Opcode,output);
+            break;
         case USERLIST:
             //User list case
-            return *ch_Opcode;
+            output.push_back(ch_Opcode[0]);
+            output.push_back(ch_Opcode[1]);
+            break;
         default:
             //stat case
-            return postOrStatToMessage(input, *ch_Opcode);
+            postOrStatToMessage(input, ch_Opcode,output);
+            break;
     }
+    return output;
 }
 
 /**
@@ -99,28 +113,24 @@ char* EncoderDecoder::stringToMessage(std::string input) {
  * @param ch_Opcode             char array represents the Opcode of this message.
  * @return      Char Array that represents the final Login or Register message
  */
-char* EncoderDecoder::registerAndLoginToMessage(std::string input, char *ch_Opcode) {
+void EncoderDecoder::registerAndLoginToMessage(std::string input, char *ch_Opcode, std::vector<char> &output) {
     //register case
     std::string userName(input.substr(0,input.find_first_of(" ")));
     input = input.substr(input.find_first_of(" ") + 1);
     std::string password(input.substr(0,input.find_first_of(" ")));
-    //creating output char* in the size of the opcode,username and password
-    char* output[userName.length() + password.length() + 4];
-    output[0] = &ch_Opcode[0];
-    output[1] = &ch_Opcode[1];
-    int index = 2;
-    for (char &i : userName) {
-        output[index] = &i;
-        index++;
+    //creating temp char* in the size of the opcode,username and password
+    output.push_back(ch_Opcode[0]);
+    output.push_back(ch_Opcode[1]);
+    for (char i : userName) {
+        //inserting all the chars of the user name
+        output.push_back(i);
     }
-    output[index] = &this->zeroDelimiter;
-    index++;
-    for (char &i : password) {
-        output[index] = &i;
-        index++;
+    output.push_back(this->zeroDelimiter);
+    for (char i : password) {
+        //inserting all the chars from the password
+        output.push_back(i);
     }
-    output[index] = &this->zeroDelimiter;
-    return *output;
+    output.push_back(this->zeroDelimiter);
 }
 
 /**
@@ -130,7 +140,7 @@ char* EncoderDecoder::registerAndLoginToMessage(std::string input, char *ch_Opco
  * @param ch_Opcode             char array represents the Opcode of this message.
  * @return      Char Array that represents the final follow message
  */
-char* EncoderDecoder::followToMessage(std::string input, char *ch_Opcode) {
+void EncoderDecoder::followToMessage(std::string input, char *ch_Opcode, std::vector<char> &output) {
     char yesOrNo;
     //getting the "follow or not follow" from the string
     std::string followOrNot = input.substr(0,input.find_first_of(" "));
@@ -164,10 +174,22 @@ char* EncoderDecoder::followToMessage(std::string input, char *ch_Opcode) {
     //1.the opcode
     //2.the follow\unfollow
     //3.the names (names) and 0 between them (names.size)
-    char* output[2 + 1 + 2 + counter+names.size()];
+
     //inserting all the elements in the right order to the output array
-    insertElementsToFollowInput(ch_Opcode, yesOrNo, names, *output);
-    return *output;
+    //inserting the opCode
+    output.push_back(ch_Opcode[0]);
+    output.push_back(ch_Opcode[1]);
+    //inserting the yesOrNo char
+    output.push_back(yesOrNo);
+    for (auto &name : names) {
+        //for each name in the vector
+        for (char j : name) {
+            //inserting all the letters of the user
+            output.push_back(j);
+        }
+        //after each name --> putting the '\0' delimiter.
+        output.push_back(this->zeroDelimiter);
+    }
 }
 
 /**
@@ -179,23 +201,20 @@ char* EncoderDecoder::followToMessage(std::string input, char *ch_Opcode) {
  * @param names                 Vector of strings represent all the UserNames the current client want to follow or unfollow
  * @param output                Char array to bput all the given information in, in the correct order
  */
-void EncoderDecoder::insertElementsToFollowInput(char *ch_Opcode, char &yesOrNo, std::vector<std::string> &names,char *output) {
+void EncoderDecoder::insertElementsToFollowInput(char *ch_Opcode, char &yesOrNo, std::vector<std::string> &names,std::vector<char> &output) {
     //inserting the opCode
-    output[0] = ch_Opcode[0];
-    output[1] = ch_Opcode[1];
+    output.push_back(ch_Opcode[0]);
+    output.push_back(ch_Opcode[1]);
     //inserting the yesOrNo char
-    output[2] = yesOrNo;
-    int index = 3;
+    output.push_back(yesOrNo);
     for (auto &name : names) {
         //for each name in the vector
         for (char j : name) {
             //inserting all the letters of the user
-            output[index] = j;
-            index++;
+            output.push_back(j);
         }
         //after each name --> putting the '\0' delimiter.
-        output[index] = this->zeroDelimiter;
-        index++;
+        output.push_back(this->zeroDelimiter);
     }
 }
 
@@ -207,23 +226,19 @@ void EncoderDecoder::insertElementsToFollowInput(char *ch_Opcode, char &yesOrNo,
  * @param ch_Opcode             char array represents the Opcode of this message.
  * @return      Char Array that represents the final PM or Stat message
  */
-char* EncoderDecoder::postOrStatToMessage(std::string input, char *ch_Opcode) {
-    //creating the output array
-    char* output[2 + input.length() + 1];
+void EncoderDecoder::postOrStatToMessage(std::string input, char *ch_Opcode, std::vector<char> &output) {
+
     //inserting the opcode to the array
-    output[0] = &ch_Opcode[0];
-    output[1] = &ch_Opcode[1];
-    int index = 2;
+    output.push_back(ch_Opcode[0]);
+    output.push_back(ch_Opcode[1]);
     //inserting:
     //1. the useranme if it's a Stat message
     //2. the content if it's a post
-    for (char &i : input) {
-        output[index] = &i;
-        index++;
+    for (char i : input) {
+        output.push_back(i);
     }
     //adding the '\0' delimiter in the end of the message
-    output[index] = &this->zeroDelimiter;
-    return *output;
+    output.push_back(this->zeroDelimiter);
 }
 
 /**
@@ -233,32 +248,26 @@ char* EncoderDecoder::postOrStatToMessage(std::string input, char *ch_Opcode) {
  * @param ch_Opcode             char array represents the Opcode of this message.
  * @return      Char Array that represents the final PM message
  */
-char* EncoderDecoder::pmToMessage(std::string input, char *ch_Opcode) {
+void EncoderDecoder::pmToMessage(std::string input, char *ch_Opcode, std::vector<char> &output) {
     //getting the user name to search in the server
     std::string userName(input.substr(0,input.find_first_of(" ")));
     //creating the output array
     input = input.substr(input.find_first_of(" ") + 1);
-    char* output[2 + userName.length() + input.length() + 2];
     //inserting the opcode to the output array
-    output[0] = &ch_Opcode[0];
-    output[1] = &ch_Opcode[1];
-
-    int index = 2;
+    output.push_back(ch_Opcode[0]);
+    output.push_back(ch_Opcode[1]);
     //inserting the user name to the array
-    for (char &i : userName) {
-        output[index] = &i;
-        index++;
+    for (char i : userName) {
+        output.push_back(i);
     }
     //adding '\0' delimiter between the username to the content of the message
-    output[index] = &this->zeroDelimiter;
+    output.push_back(this->zeroDelimiter);
     //adding all the content of the message to the output array
-    for (char &i : input) {
-        output[index] = &i;
-        index++;
+    for (char i : input) {
+        output.push_back(i);
     }
     //adding the '\0' delimiter
-    output[index] = &this->zeroDelimiter;
-    return *output;
+    output.push_back(this->zeroDelimiter);
 }
 
 //endregion Encoding Functions
@@ -275,6 +284,7 @@ short EncoderDecoder::bytesToShort(char *bytesArr) {
     result += (short)(bytesArr[1] & 0xff);
     return result;
 }
+
 
 /**
 * Convert the short number represents the opcode of the message to the message type string
