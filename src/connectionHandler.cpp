@@ -9,8 +9,6 @@ using std::endl;
 using std::string;
 using std::vector;
 
-
-
 /**
  * Default constructor
  */
@@ -47,7 +45,9 @@ bool ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
 	boost::system::error_code error;
     try {
         while (!error && bytesToRead > tmp ) {
-			tmp += socket_.read_some(boost::asio::buffer(bytes+tmp, bytesToRead-tmp), error);			
+            cout<<"wainting in getBytes"<<std::endl;
+			tmp += socket_.read_some(boost::asio::buffer(bytes+tmp, bytesToRead-tmp), error);
+			cout<<"stop waiting to read"<<std::endl;
         }
 		if(error)
 			throw boost::system::system_error(error);
@@ -63,7 +63,10 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
 	boost::system::error_code error;
     try {
         while (!error && bytesToWrite > tmp ) {
+            cout<<"waiting in send bytes"<<std::endl;
 			tmp += socket_.write_some(boost::asio::buffer(bytes + tmp, bytesToWrite - tmp), error);
+            cout<<"stopped waiting to write"<<std::endl;
+
         }
 		if(error)
 			throw boost::system::system_error(error);
@@ -89,7 +92,7 @@ bool ConnectionHandler::getFrameAscii(std::string& frame, char delimiter) {
     try {
 		do{
 			getBytes(&ch, 1);
-            //frame.append(1, ch);
+            frame.append(1, ch);
         }while (delimiter != ch);
     } catch (std::exception& e) {
         std::cerr << "recv failed (Error: " << e.what() << ')' << std::endl;
@@ -103,9 +106,11 @@ std::string ConnectionHandler::translateMessage() {
     char ch;
     std::vector<char> message;
     for(int i = 0;i < 2; i++){
+        std::cout<<"waiting to read bytes1"<<std::endl;
         getBytes(&ch,1);
         message.push_back(ch);
     }
+    std::cout<<"reached opcode1"<<std::endl;
     char ch_tempArray[2] = {message[0],message[1]};
     short opcode = this->endDec.bytesToShort(ch_tempArray);
     //could be only notification, ack, error
@@ -238,8 +243,11 @@ bool ConnectionHandler::sendFrameAscii(const std::string& frame, char delimiter)
     //string is converted to a char array the server can understand.
     std::vector<char> toConvert = this->endDec.stringToMessage(frame);
     toConvert.shrink_to_fit();
-    char* toSend = toConvert.data();
-	bool result = sendBytes(toSend, frame.length());
+    char toSend[toConvert.size()];
+    for(int i = 0 ; i <toConvert.size(); i++){
+        toSend[i] = toConvert[i];
+    }
+	bool result = sendBytes(toSend, (int)toConvert.size());
 	if(!result) return false;
 	return sendBytes(&delimiter,1);
 }
