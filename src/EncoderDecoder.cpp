@@ -147,28 +147,27 @@ void EncoderDecoder::followToMessage(std::string input, char *ch_Opcode, std::ve
     input = input.substr(input.find_first_of(" ") + 1);
     if(followOrNot == "0"){
         //follow case
-        yesOrNo = '0';
+        yesOrNo = 0;
     }
     else{
         //unfollow case
-        yesOrNo = '1';
+        yesOrNo = 1;
     }
     //taking the number of users in the list from the user input
     short numberOfUsers = (short)std::stoi(input.substr(0,input.find_first_of(" ")));
     input = input.substr(input.find_first_of(" ") + 1);
-    char* ch_numberOfUsers[2];
-    this->shortToBytes(numberOfUsers,*ch_numberOfUsers);
+    char ch_numberOfUsers[2];
+    this->shortToBytes(numberOfUsers,ch_numberOfUsers);
     //creating a vector to hold the usernames to search in the server
     std::vector<string> names;
     int counter = 0;
-    unsigned long end = input.find_first_of(" ");
-    while (end != input.npos){
+    while (counter<numberOfUsers){
         //as long as there is still a user left to read --> adding it to the names vector
         std::string current = input.substr(0,input.find_first_of(" "));
         input = input.substr(input.find_first_of(" ") + 1);
-        end = input.find_first_of(" ");
-        counter +=current.length();
+
         names.push_back(current);
+        counter++;
     }
     //the output needs to contains:
     //1.the opcode
@@ -181,6 +180,8 @@ void EncoderDecoder::followToMessage(std::string input, char *ch_Opcode, std::ve
     output.push_back(ch_Opcode[1]);
     //inserting the yesOrNo char
     output.push_back(yesOrNo);
+    output.push_back(ch_numberOfUsers[0]);
+    output.push_back(ch_numberOfUsers[1]);
     for (auto &name : names) {
         //for each name in the vector
         for (char j : name) {

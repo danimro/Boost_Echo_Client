@@ -11,14 +11,15 @@ void IOTask::run() {
         std::string userRequest;
         std::getline(std::cin ,userRequest);
         unsigned long len = userRequest.length();
-        if (!ch->sendLine(userRequest)) {
+
+        if (!ch->sendUserInput(userRequest)) {
             std::cout << "Disconnected. Exiting...\n" << std::endl;
             break;
         }
         if ((boost::to_upper_copy<std::string>(userRequest).compare("LOGOUT")) == 0){
             isLoggedOut = true;
         }
-        if ((isLoggedOut) && (len == 0) ){
+        if ((isLoggedOut)){
             break;
         }
 

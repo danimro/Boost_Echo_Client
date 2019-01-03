@@ -45,9 +45,7 @@ bool ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
 	boost::system::error_code error;
     try {
         while (!error && bytesToRead > tmp ) {
-            cout<<"wainting in getBytes"<<std::endl;
 			tmp += socket_.read_some(boost::asio::buffer(bytes+tmp, bytesToRead-tmp), error);
-			cout<<"stop waiting to read"<<std::endl;
         }
 		if(error)
 			throw boost::system::system_error(error);
@@ -63,9 +61,7 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
 	boost::system::error_code error;
     try {
         while (!error && bytesToWrite > tmp ) {
-            cout<<"waiting in send bytes"<<std::endl;
 			tmp += socket_.write_some(boost::asio::buffer(bytes + tmp, bytesToWrite - tmp), error);
-            cout<<"stopped waiting to write"<<std::endl;
 
         }
 		if(error)
@@ -81,9 +77,9 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
     return getFrameAscii(line, '\n');
 }*/
 
-bool ConnectionHandler::sendLine(std::string& line) {
+/*bool ConnectionHandler::sendLine(std::string& line) {
     return sendFrameAscii(line, '\n');
-}
+}*/
  
 bool ConnectionHandler::getFrameAscii(std::string& frame, char delimiter) {
     char ch;
@@ -106,11 +102,9 @@ std::string ConnectionHandler::translateMessage() {
     char ch;
     std::vector<char> message;
     for(int i = 0;i < 2; i++){
-        std::cout<<"waiting to read bytes1"<<std::endl;
         getBytes(&ch,1);
         message.push_back(ch);
     }
-    std::cout<<"reached opcode1"<<std::endl;
     char ch_tempArray[2] = {message[0],message[1]};
     short opcode = this->endDec.bytesToShort(ch_tempArray);
     //could be only notification, ack, error
@@ -125,7 +119,7 @@ std::string ConnectionHandler::translateMessage() {
             ch_tempArray[0] = message[2];
             ch_tempArray[1] = message[3];
             opcode = this->endDec.bytesToShort(ch_tempArray);
-            if(opcode == FOLLOW || opcode ==USERLIST){
+            if(opcode == FOLLOW || opcode == USERLIST){
                 //building the string
                 //adding the ack
                 output.append("ACK ");
@@ -150,7 +144,7 @@ std::string ConnectionHandler::translateMessage() {
                     output.append(" ");
                     std::string currentName;
                     this->getFrameAscii(currentName,'\0');
-                    output.append(currentName);
+                    output.append(currentName.substr(0,currentName.length()-1));
                 }
                 return output;
             }
@@ -213,7 +207,7 @@ std::string ConnectionHandler::translateMessage() {
             //notification case
             output.append("NOTIFICATION ");
             getBytes(&ch, 1);
-            if(ch == '0'){
+            if(ch == '\0'){
                 output.append("PM ");
             }
             else{
@@ -221,11 +215,11 @@ std::string ConnectionHandler::translateMessage() {
             }
             std::string postingUser;
             this->getFrameAscii(postingUser,'\0');
-            output.append(postingUser);
+            output.append(postingUser.substr(0,postingUser.length()-1));
             output.append(" ");
             std::string content;
             this->getFrameAscii(content,'\0');
-            output.append(content);
+            output.append(content.substr(0,content.length()-1));
             return output;
     }
 }
@@ -250,6 +244,23 @@ bool ConnectionHandler::sendFrameAscii(const std::string& frame, char delimiter)
 	bool result = sendBytes(toSend, (int)toConvert.size());
 	if(!result) return false;
 	return sendBytes(&delimiter,1);
+}
+
+/*bool ConnectionHandler::sendFrameAscii(const std::string& frame, char delimiter) {
+    bool result=sendBytes(frame.c_str(),frame.length());
+    if(!result) return false;
+    return sendBytes(&delimiter,1);
+}*/
+
+bool ConnectionHandler::sendUserInput(std::string userInput){
+    std::vector<char> toConvert = this->endDec.stringToMessage(userInput);
+    toConvert.shrink_to_fit();
+    char toSend[toConvert.size()];
+    for(int i = 0 ; i <toConvert.size(); i++){
+        toSend[i] = toConvert[i];
+    }
+    return sendBytes(toSend, (int)toConvert.size());
+
 }
  
 // Close down the connection properly.

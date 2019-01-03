@@ -55,6 +55,8 @@ public:
 
     std::string translateMessage();
 
+    bool sendUserInput(std::string userInput);
+
 }; //class ConnectionHandler
  
 #endif
