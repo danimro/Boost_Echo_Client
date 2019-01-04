@@ -17,6 +17,5 @@ void ConnectionServer::run() {
         else if(answer == "ERROR 3"){
             this->ch->setLogoutStatus(PROCEED);
         }
-
     }
 }
