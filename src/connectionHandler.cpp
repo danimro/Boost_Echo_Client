@@ -12,7 +12,8 @@ using std::vector;
 /**
  * Default constructor
  */
-ConnectionHandler::ConnectionHandler(string host, short port): host_(host), port_(port), io_service_(), socket_(io_service_),endDec(){
+ConnectionHandler::ConnectionHandler(string host, short port): host_(host), port_(port), io_service_(),
+socket_(io_service_),endDec(),currentLogoutStatus(PENDING){
     //initialising the values of the encoder decoder
     this->endDec.init();
 }
@@ -72,15 +73,7 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
     }
     return true;
 }
- 
-/*bool ConnectionHandler::getLine(std::string& line) {
-    return getFrameAscii(line, '\n');
-}*/
 
-/*bool ConnectionHandler::sendLine(std::string& line) {
-    return sendFrameAscii(line, '\n');
-}*/
- 
 bool ConnectionHandler::getFrameAscii(std::string& frame, char delimiter) {
     char ch;
     // Stop when we encounter the null character.
@@ -246,12 +239,6 @@ bool ConnectionHandler::sendFrameAscii(const std::string& frame, char delimiter)
 	return sendBytes(&delimiter,1);
 }
 
-/*bool ConnectionHandler::sendFrameAscii(const std::string& frame, char delimiter) {
-    bool result=sendBytes(frame.c_str(),frame.length());
-    if(!result) return false;
-    return sendBytes(&delimiter,1);
-}*/
-
 bool ConnectionHandler::sendUserInput(std::string userInput){
     std::vector<char> toConvert = this->endDec.stringToMessage(userInput);
     toConvert.shrink_to_fit();
@@ -261,6 +248,14 @@ bool ConnectionHandler::sendUserInput(std::string userInput){
     }
     return sendBytes(toSend, (int)toConvert.size());
 
+}
+
+LogoutStatus ConnectionHandler::getLogoutStatus() {
+    return this->currentLogoutStatus;
+}
+
+void ConnectionHandler::setLogoutStatus(LogoutStatus newStatus) {
+    this->currentLogoutStatus = newStatus;
 }
  
 // Close down the connection properly.

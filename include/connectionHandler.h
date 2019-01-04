@@ -9,6 +9,13 @@
 
 using boost::asio::ip::tcp;
 
+enum LogoutStatus{
+    PROCEED = 1,
+    TERMINATE = -1,
+    PENDING = 0
+};
+
+
 class ConnectionHandler {
 private:
 	const std::string host_;
@@ -16,6 +23,7 @@ private:
 	boost::asio::io_service io_service_;   // Provides core I/O functionality
 	tcp::socket socket_;
 	EncoderDecoder endDec;
+    LogoutStatus currentLogoutStatus;
  
 public:
     ConnectionHandler(std::string host, short port);
@@ -56,6 +64,10 @@ public:
     std::string translateMessage();
 
     bool sendUserInput(std::string userInput);
+
+    LogoutStatus getLogoutStatus();
+
+    void setLogoutStatus(LogoutStatus newStatus);
 
 }; //class ConnectionHandler
  

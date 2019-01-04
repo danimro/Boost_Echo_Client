@@ -10,7 +10,6 @@
 class IOTask {
 private:
     ConnectionHandler *ch;
-    bool isLoggedOut;
 public:
     IOTask(ConnectionHandler *connectionHandler);
     void run();
