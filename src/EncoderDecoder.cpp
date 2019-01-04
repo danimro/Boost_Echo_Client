@@ -4,7 +4,6 @@
 // Created by tomer on 02/01/19.
 //
 
-
 #include <EncoderDecoder.h>
 #include <boost/algorithm/string.hpp>
 #include <locale>
@@ -12,9 +11,7 @@
 using namespace std;
 
 
-EncoderDecoder::EncoderDecoder() : commandDictionary(), zeroDelimiter('\0')  {
-
-}
+EncoderDecoder::EncoderDecoder() : commandDictionary(), zeroDelimiter('\0')  {}
 
 /**
  * Initialising the delimiter, and the values of the Messages's opcodes
@@ -66,40 +63,46 @@ std::vector<char> EncoderDecoder::stringToMessage(std::string input) {
     //translating the first word to a Opcode using the commandDictionary.
     short opcode = this->commandDictionary.at(command);
     this->shortToBytes(opcode,ch_Opcode);
+    output = convertingToMessageByType(input, ch_Opcode, output, opcode);
+    return output;
+}
+/**
+ * Part of the "stringToMessage" Function.
+ * Decides how to convert the user input according to the opcode of the message
+ * @param input             String represents the user input
+ * @param ch_Opcode         Char array represents opcode as an array
+ * @param output            Vector of chars reprsents the vector to send to the server as an array.
+ * @param opcode            Short represent the opcode as a number
+ * @return                  Vector of chars which represents the user input as a byte array to the server.
+ */
+vector<char> & EncoderDecoder::convertingToMessageByType(string &input, char *ch_Opcode, vector<char> &output, short opcode) {
     switch (opcode) {
         case REGISTER:
-            //register case
-            registerAndLoginToMessage(input, ch_Opcode,output);
+            registerAndLoginToMessage(input, ch_Opcode, output);
             break;
         case LOGIN:
-            //login case
-            registerAndLoginToMessage(input, ch_Opcode,output);
+            registerAndLoginToMessage(input, ch_Opcode, output);
             break;
         case LOGOUT:
-            //logout case
             output.push_back(ch_Opcode[0]);
             output.push_back(ch_Opcode[1]);
             break;
         case FOLLOW:
-            //follow case
-            followToMessage(input, ch_Opcode,output);
+            followToMessage(input, ch_Opcode, output);
             break;
         case POST:
-            //post case
-            postOrStatToMessage(input, ch_Opcode,output);
+            postOrStatToMessage(input, ch_Opcode, output);
             break;
         case PM:
-            //pm case
-            pmToMessage(input, ch_Opcode,output);
+            pmToMessage(input, ch_Opcode, output);
             break;
         case USERLIST:
-            //User list case
             output.push_back(ch_Opcode[0]);
             output.push_back(ch_Opcode[1]);
             break;
         default:
             //stat case
-            postOrStatToMessage(input, ch_Opcode,output);
+            postOrStatToMessage(input, ch_Opcode, output);
             break;
     }
     return output;
@@ -165,16 +168,24 @@ void EncoderDecoder::followToMessage(std::string input, char *ch_Opcode, std::ve
         //as long as there is still a user left to read --> adding it to the names vector
         std::string current = input.substr(0,input.find_first_of(" "));
         input = input.substr(input.find_first_of(" ") + 1);
-
         names.push_back(current);
         counter++;
     }
-    //the output needs to contains:
-    //1.the opcode
-    //2.the follow\unfollow
-    //3.the names (names) and 0 between them (names.size)
+    followInsertingDataToOutput(ch_Opcode, output, yesOrNo, ch_numberOfUsers, names);
+}
 
-    //inserting all the elements in the right order to the output array
+/**
+* Part of the "followToMessage" Function
+* Inserting all the encoded data to the output vector.
+* @param ch_Opcode                 Char Array that represents the opcode of the follow message
+* @param output                    Vector of chars represents the vector to send to the server as array
+* @param yesOrNo                   Char represent whether the user wants to follow someone or not
+* @param ch_numberOfUsers          Char Array that represents the number of user the client wants to follow \ unfollow
+* @param names                     Vector of strings represents the names to follow or unfollow
+*/
+void EncoderDecoder::followInsertingDataToOutput(char *ch_Opcode, vector<char> &output, char yesOrNo, char *ch_numberOfUsers,
+                                            vector<string> &names) {
+
     //inserting the opCode
     output.push_back(ch_Opcode[0]);
     output.push_back(ch_Opcode[1]);
@@ -189,7 +200,7 @@ void EncoderDecoder::followToMessage(std::string input, char *ch_Opcode, std::ve
             output.push_back(j);
         }
         //after each name --> putting the '\0' delimiter.
-        output.push_back(this->zeroDelimiter);
+        output.push_back(zeroDelimiter);
     }
 }
 

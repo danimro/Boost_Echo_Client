@@ -30,17 +30,18 @@ int main(int argc, char *argv[]) {
     }
     std::string host = argv[1];
     auto port = (short)atoi(argv[2]);
-
     ConnectionHandler connectionHandler(host, port);
     if (!connectionHandler.connect()) {
         std::cerr << "Cannot connect to " << host << ":" << port << std::endl;
         return 1;
     }
+    //initialising IO Thread
     IOTask IO(&connectionHandler);
     std::thread IOThread(&IOTask::run,&IO);
+    //initialising communication thread
     ConnectionServer Com(&connectionHandler);
     std::thread ComThread(&ConnectionServer::run, &Com);
-
+    //terminating threads
     IOThread.join();
     ComThread.join();
     return 0;

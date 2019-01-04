@@ -11,7 +11,6 @@ void IOTask::run() {
     while(true) {
         std::string userRequest;
         std::getline(std::cin ,userRequest);
-
         if (!ch->sendUserInput(userRequest)) {
             std::cout << "Disconnected. Exiting...\n" << std::endl;
             break;
