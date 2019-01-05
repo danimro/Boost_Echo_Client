@@ -268,7 +268,7 @@ string ConnectionHandler::translatingGeneralAckMessage(string &output, short opc
 
 /**
  * Part of the "translatingMessage" function.
- * translating a Error Message that was recieved by the server to string
+ * translating a Error Message that was received by the server to string
  * @param output                        String to return to the client screen.
  * @param ch                            Char to use to read one char at a time from the server.
  * @param message                       Vector of chars represent the chars that were read from the server so far.

@@ -204,31 +204,6 @@ void EncoderDecoder::followInsertingDataToOutput(char *ch_Opcode, vector<char> &
     }
 }
 
-/**
- * Part of the FollowToMessage
- * combining all the char array that represents a Follow message,
- * and building one array that include all the information needed by the server.
- * @param ch_Opcode             Char array represent the first two bytes that are the Opcode of the message.
- * @param yesOrNo               Char that represent whether the the user want to follow or unfollow the people in the list.
- * @param names                 Vector of strings represent all the UserNames the current client want to follow or unfollow
- * @param output                Char array to bput all the given information in, in the correct order
- */
-void EncoderDecoder::insertElementsToFollowInput(char *ch_Opcode, char &yesOrNo, std::vector<std::string> &names,std::vector<char> &output) {
-    //inserting the opCode
-    output.push_back(ch_Opcode[0]);
-    output.push_back(ch_Opcode[1]);
-    //inserting the yesOrNo char
-    output.push_back(yesOrNo);
-    for (auto &name : names) {
-        //for each name in the vector
-        for (char j : name) {
-            //inserting all the letters of the user
-            output.push_back(j);
-        }
-        //after each name --> putting the '\0' delimiter.
-        output.push_back(this->zeroDelimiter);
-    }
-}
 
 /**
  * Part of the StringToMessage function
@@ -284,7 +259,7 @@ void EncoderDecoder::pmToMessage(std::string input, char *ch_Opcode, std::vector
 
 //endregion Encoding Functions
 
-    //region Decoding Functions
+//region Decoding Functions
 
 /**
 * Converting Char array to a Short number
@@ -295,160 +270,6 @@ short EncoderDecoder::bytesToShort(char *bytesArr) {
     short result = (short)((bytesArr[0] & 0xff) << 8);
     result += (short)(bytesArr[1] & 0xff);
     return result;
-}
-
-
-/**
-* Convert the short number represents the opcode of the message to the message type string
-* @param opcode            short number represent the opcode of the message type
-* @return      string represents the message type
-*/
-std::string EncoderDecoder::messageToString(char *messageFromServer) {
-
-    short incomingMessageOpcode = bytesToShort(messageFromServer);
-    switch(incomingMessageOpcode){
-        case NOTIFICATION:
-            return "NOTIFICATION " + notificationToString(messageFromServer);
-        case ACK:
-            return "ACK " + ackToString(messageFromServer);
-        default:
-            return "ERROR " + errorToString(messageFromServer);
-
-    }
-}
-
-/**
-* part of the messageToString Function;
-* convert the char array to String notification message to display on the screen to the client
-* @param messageFromServer             Char Array that was received from the server
-* @return              String representation of the message from the server.
-*/
-std::string EncoderDecoder::notificationToString(char *messageFromServer) {
-    std::string output;
-    char notificationType = messageFromServer[2];
-    if(notificationType == '0'){
-        //PM message
-        output.append("PM ");
-    }
-    else{
-        //Post Message
-        output.append("Public ");
-    }
-    int index = 3;
-    //inserting the posting username
-    index = insertCharsToOutput(messageFromServer, output, index);
-    output.append(" ");
-    //inserting the content of the message
-    index = insertCharsToOutput(messageFromServer, output, index);
-    return output;
-}
-
-/**
-* Insert to chars to string until it reaches the delimiter
-* @param messageFromServer             Char* received by the server
-* @param output                        String to add the chars to
-* @param index                         current index of the "messageFromServer" array.
-* @return
-*/
-int EncoderDecoder::insertCharsToOutput(char *messageFromServer, string &output, int index) {
-    while(messageFromServer[index] != zeroDelimiter){
-        output.append(to_string(messageFromServer[index]));
-        index++;
-    }
-    return index;
-}
-
-/**
- * part of the messageToString Function;
- * convert the char array to String ack message to display on the screen to the client
- * @param messageFromServer             Char Array that was received from the server
- * @return              String representation of the message from the server.
- */
-std::string EncoderDecoder::ackToString(char *messageFromServer) {
-    short opcode = gettingShortFromCharArray(messageFromServer,2);
-    switch(opcode){
-        case FOLLOW:
-            return std::to_string(opcode) + " " + followOrUserListAckToString(messageFromServer);
-        case USERLIST:
-            return std::to_string(opcode) + " " + followOrUserListAckToString(messageFromServer);
-        case STAT:
-            return std::to_string(opcode) + " " + statAckToString(messageFromServer);
-        default:
-            //in case it's one of the following:
-            // 1.Register
-            // 2.Login
-            // 3.Logout
-            // 4.Post
-            // 5.Pm
-            return std::to_string(opcode);
-
-    }
-}
-
-/**
-* Part of the "ackToString" functions.
-* translating all the information in the given array from the server as it was an Follow Or UserList Ack Message.
-* @param messageFromServer             Char array that was received from the server.
-* @return      String representation of the given array as a Follow Or UserList Ack message.
-*/
-std::string EncoderDecoder::followOrUserListAckToString(char *messageFromServer) {
-    std::string output;
-    short numberOfUsers = gettingShortFromCharArray(messageFromServer,4);
-    output.append(std::to_string(numberOfUsers));
-    int index = 6;
-    for(int i = 0 ; i<numberOfUsers;i++){
-        output.append(" ");
-        index = insertCharsToOutput(messageFromServer,output,index);
-    }
-
-    return output;
-}
-
-/**
- * Part of the "ackToString" functions.
- * translating all the information in the given array from the server as it was an stat Ack Message.
- * @param messageFromServer             Char array that was received from the server.
- * @return      String representation of the given array as a stat Ack message.
- */
-std::string EncoderDecoder::statAckToString(char *messageFromServer) {
-    std::string output;
-    //adding number of posts.
-    output.append(std::to_string(gettingShortFromCharArray(messageFromServer,4)));
-    output.append(" ");
-    //adding number of followers
-    output.append(std::to_string(gettingShortFromCharArray(messageFromServer,6)));
-    output.append(" ");
-    //adding number of following
-    output.append(std::to_string(gettingShortFromCharArray(messageFromServer,8)));
-    return output;
-}
-
-/**
- * part of the messageToString Function;
- * convert the char array to String error message to display on the screen to the client
- * @param messageFromServer             Char Array that was recieved from the server
- * @return              String representation of the message from the server.
- */
-std::string EncoderDecoder::errorToString(char *messageFromServer) {
-    short opcode = gettingShortFromCharArray(messageFromServer, 2);
-    //returning the number type of the error
-    return std::to_string(opcode);
-}
-
-/**
- * Taking the first two chars from the given index from the given char array and convert them to short number.
- * @param input                 char array to take the number from
- * @param startIndex            integer index to start taking the number from
- * @return                      Short number that was taken from the first two bytes from the given array.
- */
-short EncoderDecoder::gettingShortFromCharArray(char *input, int startIndex) {
-    char* number[2];
-    //getting the error type from the array.
-    number[0] = &input[startIndex];
-    startIndex++;
-    number[1] = &input[startIndex];
-    short output = bytesToShort(*number);
-    return output;
 }
 
 //endregion Decoding Functions

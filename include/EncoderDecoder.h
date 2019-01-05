@@ -55,13 +55,6 @@ class EncoderDecoder{
         std::vector<char> stringToMessage(std::string input);
 
         /**
-         * Convert the short number represents the opcode of the message to the message type string.
-         * @param opcode            short number represent the opcode of the message type.
-         * @return      string represents the message type.
-         */
-        std::string messageToString(char* messageFromServer);
-
-        /**
          * Converting Char array to a Short number.
          * @param bytesArr              Char array to convert.
          * @return        Short number that is the bytes value of what was in the bytes array.
@@ -91,6 +84,16 @@ class EncoderDecoder{
         //endregion Fields
 
         //region Encoding Functions
+        /**
+        * Part of the "stringToMessage" Function.
+        * Decides how to convert the user input according to the opcode of the message
+        * @param input             String represents the user input
+        * @param ch_Opcode         Char array represents opcode as an array
+        * @param output            Vector of chars reprsents the vector to send to the server as an array.
+        * @param opcode            Short represent the opcode as a number
+        * @return                  Vector of chars which represents the user input as a byte array to the server.
+        */
+    std::vector<char> & convertingToMessageByType(std::string &input, char *ch_Opcode, std::vector<char> &output, short opcode);
 
         /**
          * Part of the StringToMessage function
@@ -122,17 +125,6 @@ class EncoderDecoder{
         void followInsertingDataToOutput(char *ch_Opcode, std::vector<char> &output, char yesOrNo, char *ch_numberOfUsers,
                                      std::vector<std::string> &names);
 
-    /**
-         * Part of the FollowToMessage
-         * combining all the char array that represents a Follow message,
-         * and building one array that include all the information needed by the server.
-         * @param ch_Opcode             Char array represent the first two bytes that are the Opcode of the message.
-         * @param yesOrNo               Char that represent whether the the user want to follow or unfollow the people in the list.
-         * @param names                 Vector of strings represent all the UserNames the current client want to follow or unfollow
-         * @param output                Char array to bput all the given information in, in the correct order
-         */
-        void insertElementsToFollowInput(char *ch_Opcode, char &yesOrNo, std::vector<std::string> &names,
-                                         std::vector<char> &output);
         /**
          * Part of the StringToMessage function
          * when the message is identified as a Stat or Post request -->
@@ -153,75 +145,6 @@ class EncoderDecoder{
 
         //endregion Encoding Functions
 
-        //region Decoding Functions
-
-
-
-        /**
-         * part of the messageToString Function.
-         * convert the char array to String notification message to display on the screen to the client.
-         * @param messageFromServer             Char Array that was recieved from the server.
-         * @return              String representation of the message from the server.
-         */
-        std::string notificationToString(char* messageFromServer);
-
-        /**
-         * part of the messageToString Function.
-         * convert the char array to String ack message to display on the screen to the client.
-         * @param messageFromServer             Char Array that was recieved from the server.
-         * @return              String representation of the message from the server.
-         */
-        std::string ackToString(char* messageFromServer);
-        /**
-         * part of the messageToString Function.
-         * convert the char array to String error message to display on the screen to the client.
-         * @param messageFromServer             Char Array that was recieved from the server.
-         * @return              String representation of the message from the server.
-         */
-        std::string errorToString(char* messageFromServer);
-
-        /**
-         * Insert to chars to string until it reaches the delimiter.
-         * @param messageFromServer             Char* recieved by the server.
-         * @param output                        String to add the chars to.
-         * @param index                         current index of the "messageFromServer" array.
-         * @return                              Integer represents the current free index of the given output array.
-         */
-        int insertCharsToOutput(char *messageFromServer, std::string &output, int index);
-
-
-        /**
-         * Part of the "ackToString" functions.
-         * translating all the information in the given array from the server as it was an Follow Ack Message.
-         * @param messageFromServer             Char array that was received from the server.
-         * @return      String representation of the given array as a follow Ack message.
-         */
-        std::string followOrUserListAckToString(char *messageFromServer);
-
-
-        /**
-         * Part of the "ackToString" functions.
-         * translating all the information in the given array from the server as it was an stat Ack Message.
-         * @param messageFromServer             Char array that was received from the server.
-         * @return      String representation of the given array as a stat Ack message.
-         */
-        std::string statAckToString(char *messageFromServer);
-
-
-        /**
-         * Taking the first two chars from the given index from the given char array and convert them to short number.
-         * @param input                 char array to take the number from
-         * @param startIndex            integer index to start taking the number from
-         * @return                      Short number that was taken from the first two bytes from the given array.
-         */
-         short gettingShortFromCharArray(char* input,int startIndex);
-
-
-
-        //endregion Decoding Functions
-
-    std::vector<char> &
-    convertingToMessageByType(std::string &input, char *ch_Opcode, std::vector<char> &output, short opcode);
 };
 
 
