@@ -1,21 +1,21 @@
 CFLAGS:=-c -Wall -Weffc++ -g -std=c++11 -Iinclude
-LDFLAGS:=-lboost_system -lboost_thread -lboost_locale
+LDFLAGS:=-pthread -lboost_system
 
 all: BGSclient
-	g++ -o bin/BGSclient bin/connectionHandler.o bin/IOTask.o bin/ConnectionServer.o bin/EncoderDecoder.o bin/echoClient.o $(LDFLAGS)
+	g++ -o bin/BGSclient bin/ConnectionHandler.o bin/ClientRequestTask.o bin/ServerListenerTask.o bin/EncoderDecoder.o bin/echoClient.o $(LDFLAGS)
 	@echo 'finished building'
-BGSclient: bin/connectionHandler.o bin/IOTask.o bin/ConnectionServer.o bin/EncoderDecoder.o bin/echoClient.o
+BGSclient: bin/ConnectionHandler.o bin/ClientRequestTask.o bin/ServerListenerTask.o bin/EncoderDecoder.o bin/echoClient.o
 
 
 
-bin/connectionHandler.o: src/connectionHandler.cpp
-	g++ $(CFLAGS) -o bin/connectionHandler.o src/connectionHandler.cpp
+bin/ConnectionHandler.o: src/ConnectionHandler.cpp
+	g++ $(CFLAGS) -o bin/ConnectionHandler.o src/ConnectionHandler.cpp
 
-bin/IOTask.o: src/IOTask.cpp
-	g++ $(CFLAGS) -o bin/IOTask.o src/IOTask.cpp
+bin/ClientRequestTask.o: src/ClientRequestTask.cpp
+	g++ $(CFLAGS) -o bin/ClientRequestTask.o src/ClientRequestTask.cpp
 
-bin/ConnectionServer.o: src/ConnectionServer.cpp
-	g++ $(CFLAGS) -o bin/ConnectionServer.o src/ConnectionServer.cpp
+bin/ServerListenerTask.o: src/ServerListenerTask.cpp
+	g++ $(CFLAGS) -o bin/ServerListenerTask.o src/ServerListenerTask.cpp
 
 bin/EncoderDecoder.o: src/EncoderDecoder.cpp
 	g++ $(CFLAGS) -o bin/EncoderDecoder.o src/EncoderDecoder.cpp

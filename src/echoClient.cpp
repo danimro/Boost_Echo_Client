@@ -6,10 +6,10 @@
 #include <iostream>
 #include <thread>
 #include <boost/thread.hpp>
-#include "connectionHandler.h"
+#include "ConnectionHandler.h"
 #include <boost/algorithm/string.hpp>
-#include <IOTask.h>
-#include <ConnectionServer.h>
+#include <ClientRequestTask.h>
+#include <ServerListenerTask.h>
 
 using namespace boost;
 using namespace std;
@@ -36,13 +36,13 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     //initialising IO Thread
-    IOTask IO(&connectionHandler);
-    std::thread IOThread(&IOTask::run,&IO);
+    ClientRequestTask clientRequestTask(&connectionHandler);
+    std::thread clientRequestTaskThread(&ClientRequestTask::run,&clientRequestTask);
     //initialising communication thread
-    ConnectionServer Com(&connectionHandler);
-    std::thread ComThread(&ConnectionServer::run, &Com);
+    ServerListenerTask serverListenerTask(&connectionHandler);
+    std::thread serverListenerTaskThread(&ServerListenerTask::run, &serverListenerTask);
     //terminating threads
-    IOThread.join();
-    ComThread.join();
+    clientRequestTaskThread.join();
+    serverListenerTaskThread.join();
     return 0;
 }

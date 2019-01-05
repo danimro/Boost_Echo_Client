@@ -1,13 +1,13 @@
 //
-// Created by tomer on 02/01/19.
+// Created by tomergon@wincs.cs.bgu.ac.il on 1/5/19.
 //
+
 #include <boost/algorithm/string.hpp>
-#include <thread>
-#include "IOTask.h"
+#include "ClientRequestTask.h"
 
-IOTask::IOTask(ConnectionHandler *connectionHandler) : ch(connectionHandler){}
+ClientRequestTask::ClientRequestTask(ConnectionHandler *connectionHandler) : ch(connectionHandler){}
 
-void IOTask::run() {
+void ClientRequestTask::run() {
     while(true) {
         std::string userRequest;
         std::getline(std::cin ,userRequest);

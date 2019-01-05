@@ -1,12 +1,13 @@
 //
-// Created by tomer on 02/01/19.
+// Created by tomergon@wincs.cs.bgu.ac.il on 1/5/19.
 //
 
-#include "ConnectionServer.h"
 
-ConnectionServer::ConnectionServer(ConnectionHandler* connectionHandler):ch(connectionHandler){}
+#include "ServerListenerTask.h"
 
-void ConnectionServer::run() {
+ServerListenerTask::ServerListenerTask(ConnectionHandler* connectionHandler):ch(connectionHandler){}
+
+void ServerListenerTask::run() {
     while(true){
         std::string answer = ch->translateMessage();
         std::cout << answer << std::endl;

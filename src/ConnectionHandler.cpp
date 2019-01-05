@@ -1,4 +1,4 @@
-#include <connectionHandler.h>
+#include <ConnectionHandler.h>
  
 using boost::asio::ip::tcp;
 
@@ -326,7 +326,7 @@ bool ConnectionHandler::sendUserInput(std::string userInput){
     std::vector<char> toConvert = this->endDec.stringToMessage(userInput);
     toConvert.shrink_to_fit();
     char toSend[toConvert.size()];
-    for(int i = 0 ; i <toConvert.size(); i++){
+    for(unsigned long i = 0 ; i <toConvert.size(); i++){
         toSend[i] = toConvert[i];
     }
     return sendBytes(toSend, (int)toConvert.size());
